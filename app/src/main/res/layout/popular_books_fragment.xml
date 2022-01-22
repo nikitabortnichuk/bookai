@@ -11,22 +11,24 @@
         android:id="@+id/messagesListRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:overScrollMode="never"
         app:layout_constraintBottom_toTopOf="@id/inputMessage"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/inputMessage"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/input_message_bg"
         android:drawableStart="@drawable/ic_chat"
         android:drawablePadding="10dp"
         android:fontFamily="@font/circularstdbook"
         android:hint="@string/message_hint"
-        android:imeOptions="actionSearch"
+        android:imeOptions="actionNone"
         android:inputType="text"
         android:maxLength="140"
         android:maxLines="1"
+        android:minHeight="45dp"
         android:textColor="@color/white"
         android:textColorHint="@color/grey"
         android:textCursorDrawable="@null"
@@ -40,18 +42,18 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:src="@drawable/ic_voice"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@id/inputMessage"
         app:layout_constraintEnd_toEndOf="@id/inputMessage"
-        android:visibility="visible"
         app:layout_constraintTop_toTopOf="@id/inputMessage" />
 
     <ImageView
         android:id="@+id/sendButton"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:src="@drawable/ic_send_message"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/inputMessage"
         app:layout_constraintEnd_toEndOf="@id/inputMessage"
         app:layout_constraintTop_toTopOf="@id/inputMessage" />

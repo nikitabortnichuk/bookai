@@ -8,15 +8,25 @@ import com.wellenkugel.bookai.features.characters.presentation.model.messages.Me
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
 import com.wellenkugel.bookai.features.characters.presentation.view.viewholder.BotTextMessageViewHolder
 import com.wellenkugel.bookai.features.characters.presentation.view.viewholder.UserTextMessageViewHolder
+import java.util.*
 
 class ChatMessagesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val messages = ArrayList<MessageListItem>()
+    private val messages = LinkedList<MessageListItem>()
 
     fun addMessages(messages: List<MessageListItem>) {
         this.messages.clear()
         this.messages.addAll(messages)
         notifyDataSetChanged()
+    }
+
+    fun addLastMessage(message: MessageListItem, canScroll: Boolean) {
+        this.messages.addFirst(message)
+        if (canScroll) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemInserted(0)
+        }
     }
 
     // todo add one by one

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,15 +42,14 @@ class PopularBooksFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupClickListeners()
         setupMessagesListAdapter()
+        setupMessageInputOnKeyListener()
         setupMessageInputTextChangeListener()
 
         popularBooksViewModel.searchPopularBooks()
 
-        binding.voiceInput.setOnLongClickListener {
-            Log.d("TAGGERR", "Long Clicked")
-            true
-        }
+
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -94,7 +94,9 @@ class PopularBooksFragment : Fragment() {
         with(binding.messagesListRecyclerView) {
             setHasFixedSize(true)
             adapter = chatMessagesAdapter
-            layoutManager = LinearLayoutManager(this@PopularBooksFragment.requireContext())
+            layoutManager = LinearLayoutManager(this@PopularBooksFragment.requireContext()).apply {
+                reverseLayout = true
+            }
         }
 
         chatMessagesAdapter.addMessages(textList)
@@ -104,7 +106,6 @@ class PopularBooksFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
 
     // todo extract to another file
     private fun setupMessageInputTextChangeListener() {
@@ -132,6 +133,40 @@ class PopularBooksFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
             }
         })
+    }
+
+    private fun setupClickListeners() {
+        binding.voiceInput.setOnLongClickListener {
+            Log.d("TAGGERR", "Long Clicked")
+            true
+        }
+        binding.sendButton.setOnClickListener {
+            sendUserMessage()
+        }
+    }
+
+    private fun setupMessageInputOnKeyListener() {
+        binding.inputMessage.setOnKeyListener { v, keyCode, event ->
+            if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                sendUserMessage()
+                return@setOnKeyListener true
+            }
+            false
+        }
+    }
+
+    private fun sendUserMessage() {
+        val canScrollVertically = binding.messagesListRecyclerView.canScrollVertically(1)
+        chatMessagesAdapter.addLastMessage(
+            UserTextMessageItem(binding.inputMessage.text.toString()),
+            canScrollVertically
+        )
+        if (canScrollVertically) {
+            binding.messagesListRecyclerView.smoothScrollToPosition(0)
+        } else {
+            binding.messagesListRecyclerView.scrollToPosition(0)
+        }
+        binding.inputMessage.setText("")
     }
 
     companion object {
