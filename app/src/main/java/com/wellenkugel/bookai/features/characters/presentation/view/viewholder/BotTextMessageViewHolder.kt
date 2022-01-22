@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.wellenkugel.bookai.R
 import com.wellenkugel.bookai.databinding.ViewHolderBotTextMessageBinding
+import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
 
 class BotTextMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
@@ -23,7 +24,7 @@ class BotTextMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val binding: ViewHolderBotTextMessageBinding =
         ViewHolderBotTextMessageBinding.bind(view)
 
-    fun bind(text: String) {
-        binding.botTextMessage.text = text
+    fun bind(botTextMessageItem: BotTextMessageItem) {
+        binding.botTextMessage.text = botTextMessageItem.text
     }
 }

@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
+import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
+import com.wellenkugel.bookai.features.characters.presentation.model.messages.MessageListItem
+import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
 import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,10 +62,31 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun setupMessagesListAdapter() {
-        val textList = listOf<String>(
-            "Hello!", "How are you doing?",
-            "thank, I`m fine. How are you doing? hope you are well. I`m" +
-                    " writing to tell you that I will resign from the company", "Ok", "Good luck!"
+        val textList = listOf<MessageListItem>(
+            BotTextMessageItem("Hello!"),
+            BotTextMessageItem("How are you doing?"),
+            UserTextMessageItem(
+                "thank, I`m fine. How are you doing? hope you are well. I`m" +
+                        " writing to tell you that I will resign from the company"
+            ),
+            BotTextMessageItem("Ok"),
+            UserTextMessageItem("Good luck!"),
+            BotTextMessageItem("Hello!"),
+            BotTextMessageItem("How are you doing?"),
+            UserTextMessageItem(
+                "thank, I`m fine. How are you doing? hope you are well. I`m" +
+                        " writing to tell you that I will resign from the company"
+            ),
+            BotTextMessageItem("Ok"),
+            UserTextMessageItem("Good luck!"),
+            BotTextMessageItem("Hello!"),
+            BotTextMessageItem("How are you doing?"),
+            UserTextMessageItem(
+                "thank, I`m fine. How are you doing? hope you are well. I`m" +
+                        " writing to tell you that I will resign from the company"
+            ),
+            BotTextMessageItem("Ok"),
+            UserTextMessageItem("Good luck!")
         )
 
         with(binding.messagesListRecyclerView) {

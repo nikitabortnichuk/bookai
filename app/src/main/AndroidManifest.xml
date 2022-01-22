@@ -17,6 +17,7 @@
         <activity
             android:name="com.wellenkugel.bookai.features.characters.presentation.view.MainActivity"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustResize"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
