@@ -68,9 +68,7 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun setupListAdapter() {
-        context?.let {
-            binding.charactersRecyclerView.initRecyclerViewWithLineDecoration(it)
-        }
+
     }
 
     override fun onDestroyView() {
