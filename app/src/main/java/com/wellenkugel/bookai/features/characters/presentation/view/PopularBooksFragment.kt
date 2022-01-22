@@ -3,8 +3,6 @@ package com.wellenkugel.bookai.features.characters.presentation.view
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -18,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.wellenkugel.bookai.R
 import com.wellenkugel.bookai.core.audio.PlayController
 import com.wellenkugel.bookai.core.audio.RecordController
+import com.wellenkugel.bookai.core.ext.onTextChange
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
@@ -26,6 +25,7 @@ import com.wellenkugel.bookai.features.characters.presentation.model.messages.Us
 import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlin.math.min
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -132,56 +132,36 @@ class PopularBooksFragment : Fragment() {
         _binding = null
     }
 
-    // todo extract to another file
     private fun setupMessageInputTextChangeListener() {
-        binding.inputMessage.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(
-                sequence: CharSequence?,
-                start: Int,
-                before: Int,
-                count: Int
-            ) {
-                with(binding) {
-                    if (sequence.isNullOrEmpty()) {
-                        voiceInput.visibility = View.VISIBLE
-                        sendButton.visibility = View.GONE
-                    } else {
-                        voiceInput.visibility = View.GONE
-                        sendButton.visibility = View.VISIBLE
-                    }
+        binding.inputMessage.onTextChange {
+            with(binding) {
+                if (it.isEmpty()) {
+                    voiceInput.visibility = View.VISIBLE
+                    sendButton.visibility = View.GONE
+                } else {
+                    voiceInput.visibility = View.GONE
+                    sendButton.visibility = View.VISIBLE
                 }
             }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-        })
+        }
     }
 
     private fun setupClickListeners() {
         var filePath = ""
         binding.voiceInput.setOnClickListener {
-            if (recordController?.isAudioRecording() == true) {
-                recordController?.stop()
-                setInputMessageTextAfterRecordingAudio()
-            } else {
-                filePath = recordController?.start() ?: ""
-                setInputMessageTextDuringRecordingAudio()
-            }
+            onButtonClicked()
         }
         binding.sendButton.setOnClickListener {
             sendUserMessage()
         }
-        binding.indicator.setOnClickListener {
-            if (playController?.isAudioPlaying() == true) {
-                playController?.stop()
-            } else {
-                Log.d("TAGGERR", filePath)
-                playController?.start(filePath)
-            }
-        }
+//        binding.indicator.setOnClickListener {
+//            if (playController?.isAudioPlaying() == true) {
+//                playController?.stop()
+//            } else {
+//                Log.d("TAGGERR", filePath)
+//                playController?.start(filePath)
+//            }
+//        }
     }
 
     private fun setupMessageInputOnKeyListener() {
@@ -208,37 +188,39 @@ class PopularBooksFragment : Fragment() {
         binding.inputMessage.setText("")
     }
 
-//    private fun onButtonClicked() {
-//        if (recordController?.isAudioRecording() == true) {
-//            recordController?.stop()
-//            countDownTimer?.cancel()
-//            countDownTimer = null
-//        } else {
-//            countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
-//                override fun onTick(p0: Long) {
-//                    val volume = recordController?.getVolume()
-//                    Log.d(TAG, "Volume = $volume")
-//                    handleVolume(volume!!)
-//                }
-//
-//                override fun onFinish() {
-//                }
-//            }.apply {
-//                start()
-//            }
-//        }
-//    }
-//
-//    private fun handleVolume(volume: Int) {
-//        val scale = min(8.0, volume / MAX_RECORD_AMPLITUDE + 1.0).toFloat()
-//        Log.d(TAG, "Scale = $scale")
-//
-//        binding.indicator.animate()
-//            .scaleX(scale)
-//            .scaleY(scale)
-//            .setInterpolator(interpolator)
-//            .duration = VOLUME_UPDATE_DURATION
-//    }
+    private fun onButtonClicked() {
+        if (recordController?.isAudioRecording() == true) {
+            setInputMessageTextAfterRecordingAudio()
+            recordController?.stop()
+            countDownTimer?.cancel()
+            binding.indicator.visibility = View.GONE
+            countDownTimer = null
+        } else {
+            // todo returns path
+            binding.indicator.visibility = View.VISIBLE
+            recordController?.start()
+            setInputMessageTextDuringRecordingAudio()
+            countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
+                override fun onTick(p0: Long) {
+                    val volume = recordController?.getVolume()
+                    handleVolume(volume ?: return)
+                }
+
+                override fun onFinish() {}
+            }.apply {
+                start()
+            }
+        }
+    }
+
+    private fun handleVolume(volume: Int) {
+        val scale = min(8.0, volume / MAX_RECORD_AMPLITUDE + 1.0).toFloat()
+        binding.indicator.animate()
+            .scaleX(scale)
+            .scaleY(scale)
+            .setInterpolator(interpolator)
+            .duration = VOLUME_UPDATE_DURATION
+    }
 
     private fun setInputMessageTextDuringRecordingAudio() {
         binding.voiceInput.setImageResource(R.drawable.ic_micro_recording)
@@ -254,8 +236,7 @@ class PopularBooksFragment : Fragment() {
     }
 
     companion object {
-        val TAG = "CharacterSearchFragment"
-        val CHARACTER_DETAILS = "character_details"
+        val TAG = "ChatFragment"
         private const val MAX_RECORD_AMPLITUDE = 32768.0
         private const val VOLUME_UPDATE_DURATION = 100L
         private val interpolator = OvershootInterpolator()
