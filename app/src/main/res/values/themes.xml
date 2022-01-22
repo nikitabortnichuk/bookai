@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.StarWars" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Bookai" parent="Theme.AppCompat.Light">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
@@ -13,7 +13,7 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
 
-        <item name="windowNoTitle">true</item>
+        <item name="titleTextColor">#787878</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="colorControlNormal">@color/background</item>
     </style>

@@ -1,13 +1,15 @@
 package com.wellenkugel.bookai.features.characters.presentation.view
 
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
-import com.wellenkugel.bookai.features.characters.presentation.initRecyclerViewWithLineDecoration
 import com.wellenkugel.bookai.features.characters.presentation.model.SCharacterPresentation
 import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +22,7 @@ class PopularBooksFragment : Fragment() {
     private var _binding: PopularBooksFragmentBinding? = null
     private val binding get() = _binding!!
     private val popularBooksViewModel: PopularBooksViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,6 +35,11 @@ class PopularBooksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         popularBooksViewModel.searchPopularBooks()
+
+        binding.voiceInput.setOnLongClickListener {
+            Log.d("TAGGERR", "Long Clicked")
+            true
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -42,32 +50,13 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun setupView() {
-//        characterSearchViewModel.openCharacterDetailsEvent.observe(viewLifecycleOwner, Observer {
-//            val fm = activity?.supportFragmentManager
-//            val characterDetailsFragment =
-//                CharacterDetailsFragment()
-//            characterDetailsFragment.arguments = bundleOf(
-//                CHARACTER_DETAILS to it
-//            )
-//            fm?.beginTransaction()
-//                ?.add(R.id.main_host, characterDetailsFragment, CharacterDetailsFragment.TAG)
-//                ?.addToBackStack(CharacterDetailsFragment.TAG)?.commit()
-//        })
-    }
 
-    private fun openCharacterDetails(character: SCharacterPresentation) {
-//        val fm = activity?.supportFragmentManager
-//        val characterDetailsFragment =
-//            CharacterDetailsFragment()
-//        characterDetailsFragment.arguments = bundleOf(
-//            CHARACTER_DETAILS to character
-//        )
-//        fm?.beginTransaction()
-//            ?.add(R.id.main_host, characterDetailsFragment, CharacterDetailsFragment.TAG)
-//            ?.addToBackStack(CharacterDetailsFragment.TAG)?.commit()
     }
 
     private fun setupListAdapter() {
+        val textList = listOf<String>("Hello!", "How are you doing?",
+            "thank, I`m fine. How are you doing? hope you are well. I`m" +
+                    " writing to tell you that I will resign from the company", "Ok", "Good luck!")
 
     }
 

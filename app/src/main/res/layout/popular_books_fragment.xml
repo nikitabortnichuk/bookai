@@ -13,7 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:background="@drawable/input_message_bg"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:drawableStart="@drawable/ic_chat"
         android:drawablePadding="10dp"
         android:fontFamily="@font/circularstdbook"
@@ -26,6 +25,17 @@
         android:textColorHint="@color/grey"
         android:textCursorDrawable="@null"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/voiceInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_voice"
+        app:layout_constraintBottom_toBottomOf="@id/inputMessage"
+        app:layout_constraintEnd_toEndOf="@id/inputMessage"
+        app:layout_constraintTop_toTopOf="@id/inputMessage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
