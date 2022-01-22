@@ -1,6 +1,8 @@
 package com.wellenkugel.bookai.features.characters.presentation.view
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -40,7 +42,7 @@ class PopularBooksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMessagesListAdapter()
-
+        setupMessageInputTextChangeListener()
 
         popularBooksViewModel.searchPopularBooks()
 
@@ -101,6 +103,35 @@ class PopularBooksFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    // todo extract to another file
+    private fun setupMessageInputTextChangeListener() {
+        binding.inputMessage.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(
+                sequence: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                with(binding) {
+                    if (sequence.isNullOrEmpty()) {
+                        voiceInput.visibility = View.VISIBLE
+                        sendButton.visibility = View.GONE
+                    } else {
+                        voiceInput.visibility = View.GONE
+                        sendButton.visibility = View.VISIBLE
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+        })
     }
 
     companion object {
