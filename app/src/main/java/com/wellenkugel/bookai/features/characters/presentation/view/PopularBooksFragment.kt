@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.wellenkugel.bookai.R
 import com.wellenkugel.bookai.core.audio.PlayController
 import com.wellenkugel.bookai.core.audio.RecordController
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
@@ -68,7 +69,8 @@ class PopularBooksFragment : Fragment() {
         super.onStart()
         ActivityCompat.requestPermissions(
             requireActivity(),
-            arrayOf(android.Manifest.permission.RECORD_AUDIO,
+            arrayOf(
+                android.Manifest.permission.RECORD_AUDIO,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             ),
             777,
@@ -163,8 +165,10 @@ class PopularBooksFragment : Fragment() {
         binding.voiceInput.setOnClickListener {
             if (recordController?.isAudioRecording() == true) {
                 recordController?.stop()
+                setInputMessageTextAfterRecordingAudio()
             } else {
                 filePath = recordController?.start() ?: ""
+                setInputMessageTextDuringRecordingAudio()
             }
         }
         binding.sendButton.setOnClickListener {
@@ -235,6 +239,19 @@ class PopularBooksFragment : Fragment() {
 //            .setInterpolator(interpolator)
 //            .duration = VOLUME_UPDATE_DURATION
 //    }
+
+    private fun setInputMessageTextDuringRecordingAudio() {
+        binding.voiceInput.setImageResource(R.drawable.ic_micro_recording)
+        binding.inputMessage.hint = "Listening..."
+        binding.inputMessage.isFocusable = false
+    }
+
+    private fun setInputMessageTextAfterRecordingAudio() {
+        binding.voiceInput.setImageResource(R.drawable.ic_voice)
+        binding.inputMessage.hint = "Message"
+        binding.inputMessage.isFocusableInTouchMode = true
+        binding.inputMessage.requestFocus()
+    }
 
     companion object {
         val TAG = "CharacterSearchFragment"
