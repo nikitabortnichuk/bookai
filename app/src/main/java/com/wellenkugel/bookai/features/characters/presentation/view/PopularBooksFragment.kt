@@ -1,6 +1,8 @@
 package com.wellenkugel.bookai.features.characters.presentation.view
 
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -8,9 +10,13 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.wellenkugel.bookai.core.audio.PlayController
+import com.wellenkugel.bookai.core.audio.RecordController
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
@@ -28,6 +34,10 @@ class PopularBooksFragment : Fragment() {
     private val binding get() = _binding!!
     private val popularBooksViewModel: PopularBooksViewModel by viewModels()
     private lateinit var chatMessagesAdapter: ChatMessagesAdapter
+    private var recordController: RecordController? = null
+    private var playController: PlayController? = null
+    private var countDownTimer: CountDownTimer? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,6 +45,8 @@ class PopularBooksFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // todo move to Dagger
+        recordController = RecordController(requireContext())
+        playController = PlayController()
         chatMessagesAdapter = ChatMessagesAdapter()
         _binding = PopularBooksFragmentBinding.inflate(inflater, container, false)
         return binding.root
@@ -50,6 +62,17 @@ class PopularBooksFragment : Fragment() {
         popularBooksViewModel.searchPopularBooks()
 
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        ActivityCompat.requestPermissions(
+            requireActivity(),
+            arrayOf(android.Manifest.permission.RECORD_AUDIO,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            ),
+            777,
+        )
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -136,12 +159,24 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.voiceInput.setOnLongClickListener {
-            Log.d("TAGGERR", "Long Clicked")
-            true
+        var filePath = ""
+        binding.voiceInput.setOnClickListener {
+            if (recordController?.isAudioRecording() == true) {
+                recordController?.stop()
+            } else {
+                filePath = recordController?.start() ?: ""
+            }
         }
         binding.sendButton.setOnClickListener {
             sendUserMessage()
+        }
+        binding.indicator.setOnClickListener {
+            if (playController?.isAudioPlaying() == true) {
+                playController?.stop()
+            } else {
+                Log.d("TAGGERR", filePath)
+                playController?.start(filePath)
+            }
         }
     }
 
@@ -169,8 +204,43 @@ class PopularBooksFragment : Fragment() {
         binding.inputMessage.setText("")
     }
 
+//    private fun onButtonClicked() {
+//        if (recordController?.isAudioRecording() == true) {
+//            recordController?.stop()
+//            countDownTimer?.cancel()
+//            countDownTimer = null
+//        } else {
+//            countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
+//                override fun onTick(p0: Long) {
+//                    val volume = recordController?.getVolume()
+//                    Log.d(TAG, "Volume = $volume")
+//                    handleVolume(volume!!)
+//                }
+//
+//                override fun onFinish() {
+//                }
+//            }.apply {
+//                start()
+//            }
+//        }
+//    }
+//
+//    private fun handleVolume(volume: Int) {
+//        val scale = min(8.0, volume / MAX_RECORD_AMPLITUDE + 1.0).toFloat()
+//        Log.d(TAG, "Scale = $scale")
+//
+//        binding.indicator.animate()
+//            .scaleX(scale)
+//            .scaleY(scale)
+//            .setInterpolator(interpolator)
+//            .duration = VOLUME_UPDATE_DURATION
+//    }
+
     companion object {
         val TAG = "CharacterSearchFragment"
         val CHARACTER_DETAILS = "character_details"
+        private const val MAX_RECORD_AMPLITUDE = 32768.0
+        private const val VOLUME_UPDATE_DURATION = 100L
+        private val interpolator = OvershootInterpolator()
     }
 }
