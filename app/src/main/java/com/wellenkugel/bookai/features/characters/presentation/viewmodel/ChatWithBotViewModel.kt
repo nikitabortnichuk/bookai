@@ -101,17 +101,20 @@ class ChatWithBotViewModel @Inject constructor(
     private fun searchBooksBySubject(subject: String) {
         popularBooksUseCase(job, subject) {
             it.fold(
-                ::handleFailure,
-                ::handleSuccessBySearchBooksBySubject
-            )
+                ::handleFailure
+            ) { books -> handleSuccessBySearchBooksBySubject(books, subject) }
         }
     }
 
-    private fun handleSuccessBySearchBooksBySubject(suggestedBooks: List<BookDetails>) {
+    private fun handleSuccessBySearchBooksBySubject(
+        suggestedBooks: List<BookDetails>,
+        subject: String
+    ) {
         Log.d("TAGGERR", suggestedBooks.toString())
         if (suggestedBooks.isNotEmpty()) {
-            var combinedMessage = ""
-            suggestedBooks.forEachIndexed { index, bookDetails ->
+            var combinedMessage = "Here is the list of books regarding $subject: \n"
+
+            suggestedBooks.shuffled().forEachIndexed { index, bookDetails ->
                 if (index > 3) return@forEachIndexed
                 combinedMessage += DIVIDER + bookDetails.title + "\n"
             }
