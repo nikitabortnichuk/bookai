@@ -54,6 +54,14 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'crea
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Nikita_Bortnichuk\\Documents\\keystores\\bookaireleasekey.jks')
+            storePassword 'bookairelease'
+            keyPassword 'bookairelease'
+            keyAlias 'key0'
+        }
+    }
     compileSdkVersion AndroidSdk.compileSdk
     buildToolsVersion AndroidSdk.buildTools
 
@@ -65,12 +73,14 @@ android {
         versionName AndroidClient.versionName
 
         testInstrumentationRunner "com.wellenkugel.bookai.CustomTestRunner"
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
@@ -103,7 +113,13 @@ android {
     }
 }
 
+apply plugin: 'com.android.application'
+
+apply plugin: 'com.google.gms.google-services'
+
 dependencies {
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:29.0.4')
 
     //core
     implementation Libraries.kotlinStd
