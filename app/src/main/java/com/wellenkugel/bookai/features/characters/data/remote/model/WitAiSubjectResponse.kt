@@ -14,13 +14,14 @@ data class WitAiSubjectResponse(
         val bookKeywords: List<BookKeywords>?
     ) {
         data class BookKeywords(
-            val body: String
+            val body: String,
+            val value: String?
         )
     }
 
     fun toDomainObject() = BookSubject(
         text = text,
         subject = if (entity?.bookKeywords == null || entity.bookKeywords.isEmpty()) ""
-        else entity.bookKeywords[0].body
+        else entity.bookKeywords[0].value ?: ""
     )
 }

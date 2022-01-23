@@ -3,12 +3,9 @@ package com.wellenkugel.bookai.features.characters.presentation.view
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
 import android.view.*
-import android.view.animation.OvershootInterpolator
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -75,6 +72,8 @@ class ChatWithBotFragment : Fragment() {
         setupMessagesListAdapter()
         speechRecognizer?.onResults {
             binding.inputMessage.setText(it)
+            speechRecognizer?.stopListening()
+            setInputMessageTextAfterRecordingAudio()
         }
         viewModel.initialMessageView.observe(viewLifecycleOwner, {
             chatMessagesAdapter.addMessages(it)
@@ -102,6 +101,7 @@ class ChatWithBotFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        speechRecognizer?.destroy()
         _binding = null
     }
 
@@ -156,14 +156,16 @@ class ChatWithBotFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun onVoiceButtonClicked() {
-        binding.voiceInput.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
+        binding.voiceInput.setOnTouchListener { v, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_UP) {
                 speechRecognizer?.stopListening()
                 setInputMessageTextAfterRecordingAudio()
+                return@setOnTouchListener true
             }
-            if (event.action == MotionEvent.ACTION_DOWN) {
+            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 speechRecognizer?.startListening(speechRecognizerIntent)
                 setInputMessageTextDuringRecordingAudio()
+                return@setOnTouchListener true
             }
             false
         }
@@ -180,17 +182,18 @@ class ChatWithBotFragment : Fragment() {
         }
     }
 
-    private fun setInputMessageTextDuringRecordingAudio() {
-        binding.voiceInput.setImageResource(R.drawable.ic_micro_recording)
-        binding.inputMessage.hint = "Listening..."
-        binding.inputMessage.isFocusable = false
+    private fun setInputMessageTextDuringRecordingAudio()=  with(binding){
+        voiceInput.setImageResource(R.drawable.ic_micro_recording)
+        inputMessage.hint = "Listening..."
+        inputMessage.isFocusable = false
     }
 
-    private fun setInputMessageTextAfterRecordingAudio() {
-        binding.voiceInput.setImageResource(R.drawable.ic_voice)
-        binding.inputMessage.hint = "Message"
-        binding.inputMessage.isFocusableInTouchMode = true
-        binding.inputMessage.requestFocus()
+    private fun setInputMessageTextAfterRecordingAudio() = with(binding){
+        voiceInput.setImageResource(R.drawable.ic_voice)
+        inputMessage.hint = "Message"
+        inputMessage.isFocusableInTouchMode = true
+        inputMessage.requestFocus()
+        inputMessage.setSelection(inputMessage.length())
     }
 
     companion object {

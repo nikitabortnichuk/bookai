@@ -17,10 +17,10 @@
 
     <View
         android:id="@+id/indicator"
-        android:visibility="gone"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/oval"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -30,6 +30,7 @@
         android:id="@+id/inputMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/input_message_bg"
         android:drawableStart="@drawable/ic_chat"
         android:drawablePadding="10dp"
@@ -38,7 +39,6 @@
         android:imeOptions="actionNone"
         android:inputType="text"
         android:maxLength="140"
-        android:paddingEnd="40dp"
         android:maxLines="1"
         android:minHeight="45dp"
         android:textColor="@color/white"
@@ -48,6 +48,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/input_message_bg"
+        app:layout_constraintBottom_toBottomOf="@id/inputMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/inputMessage"
+        app:layout_constraintTop_toTopOf="@id/inputMessage" />
+
     <ImageView
         android:id="@+id/voiceInput"
         android:layout_width="wrap_content"
@@ -56,7 +65,7 @@
         android:src="@drawable/ic_voice"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@id/inputMessage"
-        app:layout_constraintEnd_toEndOf="@id/inputMessage"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/inputMessage" />
 
     <ImageView
@@ -67,7 +76,7 @@
         android:src="@drawable/ic_send_message"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/inputMessage"
-        app:layout_constraintEnd_toEndOf="@id/inputMessage"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/inputMessage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
