@@ -11,7 +11,6 @@ import java.io.IOException
 class RecordController(private val context: Context) {
 
     private var audioRecorder: MediaRecorder? = null
-    // todo fixme
     private var fileName: String? = context.externalCacheDir?.absolutePath ?: ""
 
     fun start() : String {
