@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wellenkugel.bookai.R
 import com.wellenkugel.bookai.core.audio.NotificationSound
+import com.wellenkugel.bookai.core.ext.onResults
 import com.wellenkugel.bookai.core.ext.onTextChange
 import com.wellenkugel.bookai.databinding.ChatWithBotFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
@@ -61,39 +62,6 @@ class ChatWithBotFragment : Fragment() {
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         )
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-
-        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {
-            }
-
-            override fun onBeginningOfSpeech() {
-            }
-
-            override fun onRmsChanged(rmsdB: Float) {
-            }
-
-            override fun onBufferReceived(buffer: ByteArray?) {
-            }
-
-            override fun onEndOfSpeech() {
-            }
-
-            override fun onError(error: Int) {
-            }
-
-            override fun onResults(results: Bundle?) {
-                val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                binding.inputMessage.setText(data!![0])
-            }
-
-            override fun onPartialResults(partialResults: Bundle?) {
-            }
-
-            override fun onEvent(eventType: Int, params: Bundle?) {
-            }
-
-        })
-        //////////////////
         _binding = ChatWithBotFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -105,6 +73,9 @@ class ChatWithBotFragment : Fragment() {
         setupMessageInputOnKeyListener()
         setupMessageInputTextChangeListener()
         setupMessagesListAdapter()
+        speechRecognizer?.onResults {
+            binding.inputMessage.setText(it)
+        }
         viewModel.initialMessageView.observe(viewLifecycleOwner, {
             chatMessagesAdapter.addMessages(it)
             scrollToLastMessage()
@@ -149,9 +120,7 @@ class ChatWithBotFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.voiceInput.setOnClickListener {
-            onVoiceButtonClicked()
-        }
+        onVoiceButtonClicked()
         binding.sendButton.setOnClickListener {
             sendUserMessage()
         }
@@ -226,8 +195,5 @@ class ChatWithBotFragment : Fragment() {
 
     companion object {
         val TAG = "ChatFragment"
-        private const val MAX_RECORD_AMPLITUDE = 32768.0
-        private const val VOLUME_UPDATE_DURATION = 100L
-        private val interpolator = OvershootInterpolator()
     }
 }
