@@ -1,4 +1,4 @@
-package com.wellenkugel.bookai.features.characters.presentation.model.messages
+package com.wellenkugel.bookai.features.characters.domain.model
 
 interface MessageListItem {
 

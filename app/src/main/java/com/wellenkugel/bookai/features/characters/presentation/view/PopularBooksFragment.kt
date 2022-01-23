@@ -15,20 +15,23 @@ import android.view.animation.OvershootInterpolator
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wellenkugel.bookai.R
+import com.wellenkugel.bookai.core.audio.NotificationSound
 import com.wellenkugel.bookai.core.audio.PlayController
 import com.wellenkugel.bookai.core.audio.RecordController
 import com.wellenkugel.bookai.core.ext.onTextChange
 import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
-import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
-import com.wellenkugel.bookai.features.characters.presentation.model.messages.MessageListItem
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
 import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.util.*
+import javax.inject.Inject
 import kotlin.math.min
 
 
@@ -38,8 +41,13 @@ class PopularBooksFragment : Fragment() {
 
     private var _binding: PopularBooksFragmentBinding? = null
     private val binding get() = _binding!!
-    private val popularBooksViewModel: PopularBooksViewModel by viewModels()
-    private lateinit var chatMessagesAdapter: ChatMessagesAdapter
+    private val viewModel: PopularBooksViewModel by viewModels()
+
+    @Inject
+    internal lateinit var chatMessagesAdapter: ChatMessagesAdapter
+
+    @Inject
+    internal lateinit var notificationSound: NotificationSound
     private var recordController: RecordController? = null
     private var playController: PlayController? = null
     private var countDownTimer: CountDownTimer? = null
@@ -106,10 +114,12 @@ class PopularBooksFragment : Fragment() {
             }
 
         })
+///////////////////
+
 
         recordController = RecordController(requireContext())
         playController = PlayController()
-        chatMessagesAdapter = ChatMessagesAdapter()
+        //////////////////
         _binding = PopularBooksFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -120,7 +130,14 @@ class PopularBooksFragment : Fragment() {
         setupMessagesListAdapter()
         setupMessageInputOnKeyListener()
         setupMessageInputTextChangeListener()
-        popularBooksViewModel.searchPopularBooks()
+        setupMessagesListAdapter()
+        viewModel.searchPopularBooks()
+
+        ///////
+        viewModel.messageView.observe(viewLifecycleOwner, {
+            chatMessagesAdapter.addMessages(it)
+        })
+        viewModel.getAllMessages()
     }
 
     override fun onStart() {
@@ -135,45 +152,7 @@ class PopularBooksFragment : Fragment() {
         )
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-//        characterSearchViewModel.getRecentCharacters()
-        setupView()
-        setupMessagesListAdapter()
-    }
-
-    private fun setupView() {
-
-    }
-
     private fun setupMessagesListAdapter() {
-        val textList = listOf<MessageListItem>(
-            BotTextMessageItem("Hello!"),
-            BotTextMessageItem("How are you doing?"),
-            UserTextMessageItem(
-                "thank, I`m fine. How are you doing? hope you are well. I`m" +
-                        " writing to tell you that I will resign from the company"
-            ),
-            BotTextMessageItem("Ok"),
-            UserTextMessageItem("Good luck!"),
-            BotTextMessageItem("Hello!"),
-            BotTextMessageItem("How are you doing?"),
-            UserTextMessageItem(
-                "thank, I`m fine. How are you doing? hope you are well. I`m" +
-                        " writing to tell you that I will resign from the company"
-            ),
-            BotTextMessageItem("Ok"),
-            UserTextMessageItem("Good luck!"),
-            BotTextMessageItem("Hello!"),
-            BotTextMessageItem("How are you doing?"),
-            UserTextMessageItem(
-                "thank, I`m fine. How are you doing? hope you are well. I`m" +
-                        " writing to tell you that I will resign from the company"
-            ),
-            BotTextMessageItem("Ok"),
-            UserTextMessageItem("Good luck!")
-        )
-
         with(binding.messagesListRecyclerView) {
             setHasFixedSize(true)
             adapter = chatMessagesAdapter
@@ -181,8 +160,6 @@ class PopularBooksFragment : Fragment() {
                 reverseLayout = true
             }
         }
-
-        chatMessagesAdapter.addMessages(textList)
     }
 
     override fun onDestroyView() {
@@ -211,14 +188,6 @@ class PopularBooksFragment : Fragment() {
         binding.sendButton.setOnClickListener {
             sendUserMessage()
         }
-//        binding.indicator.setOnClickListener {
-//            if (playController?.isAudioPlaying() == true) {
-//                playController?.stop()
-//            } else {
-//                Log.d("TAGGERR", filePath)
-//                playController?.start(filePath)
-//            }
-//        }
     }
 
     private fun setupMessageInputOnKeyListener() {
@@ -232,7 +201,8 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun sendUserMessage() {
-        popularBooksViewModel.getBookSubjectByQuestion(binding.inputMessage.text.toString())
+        notificationSound.playSound()
+        viewModel.getBookSubjectByQuestion(binding.inputMessage.text.toString())
         val canScrollVertically = binding.messagesListRecyclerView.canScrollVertically(1)
         chatMessagesAdapter.addLastMessage(
             UserTextMessageItem(binding.inputMessage.text.toString()),
@@ -246,8 +216,6 @@ class PopularBooksFragment : Fragment() {
         binding.inputMessage.setText("")
     }
 
-    private var filePath = ""
-
     private fun onVoiceButtonClicked() {
         if (recordController?.isAudioRecording() == true) {
             setInputMessageTextAfterRecordingAudio()
@@ -256,9 +224,8 @@ class PopularBooksFragment : Fragment() {
             binding.indicator.visibility = View.GONE
             countDownTimer = null
         } else {
-            // todo returns path
             binding.indicator.visibility = View.VISIBLE
-            filePath = recordController?.start() ?: ""
+            recordController?.start()
             setInputMessageTextDuringRecordingAudio()
             countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
                 override fun onTick(p0: Long) {

@@ -3,8 +3,8 @@ package com.wellenkugel.bookai.features.characters.presentation.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
-import com.wellenkugel.bookai.features.characters.presentation.model.messages.MessageListItem
-import com.wellenkugel.bookai.features.characters.presentation.model.messages.MessageListItem.MessageListItemViewType
+import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem
+import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem.MessageListItemViewType
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
 import com.wellenkugel.bookai.features.characters.presentation.view.viewholder.BotTextMessageViewHolder
 import com.wellenkugel.bookai.features.characters.presentation.view.viewholder.UserTextMessageViewHolder

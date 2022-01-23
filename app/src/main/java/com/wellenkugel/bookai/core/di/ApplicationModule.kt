@@ -1,14 +1,18 @@
 package com.wellenkugel.bookai.core.di
 
+import android.content.Context
 import com.wellenkugel.bookai.BuildConfig
+import com.wellenkugel.bookai.core.audio.NotificationSound
 import com.wellenkugel.bookai.features.characters.data.remote.api.BooksRapidApi
 import com.wellenkugel.bookai.features.characters.data.remote.api.WitAiApi
 import com.wellenkugel.bookai.features.characters.data.repository.BooksRapidRepository
 import com.wellenkugel.bookai.features.characters.domain.repository.IBooksRapidRepository
+import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -64,6 +68,15 @@ object NetworkModule {
     fun provideWitAiService(@Named("witAi") retrofit: Retrofit): WitAiApi {
         return retrofit.create(WitAiApi::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideNotificationSound(@ApplicationContext appContext: Context): NotificationSound =
+        NotificationSound(appContext)
+
+    @Singleton
+    @Provides
+    fun provideMessageAdapter() = ChatMessagesAdapter()
 }
 
 

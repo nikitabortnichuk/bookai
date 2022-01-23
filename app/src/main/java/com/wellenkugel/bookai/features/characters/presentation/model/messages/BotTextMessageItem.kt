@@ -1,6 +1,7 @@
 package com.wellenkugel.bookai.features.characters.presentation.model.messages
 
-import com.wellenkugel.bookai.features.characters.presentation.model.messages.MessageListItem.MessageListItemViewType
+import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem
+import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem.MessageListItemViewType
 
 data class BotTextMessageItem(
     val text: String

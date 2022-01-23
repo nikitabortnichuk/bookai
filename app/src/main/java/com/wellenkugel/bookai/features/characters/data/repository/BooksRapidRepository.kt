@@ -8,6 +8,8 @@ import com.wellenkugel.bookai.features.characters.data.remote.api.WitAiApi
 import com.wellenkugel.bookai.features.characters.data.remote.request.BookBySubjectRequestBody
 import com.wellenkugel.bookai.features.characters.domain.model.BookDetails
 import com.wellenkugel.bookai.features.characters.domain.model.BookSubject
+import com.wellenkugel.bookai.features.characters.domain.model.Message
+import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem
 import com.wellenkugel.bookai.features.characters.domain.repository.IBooksRapidRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -59,4 +61,15 @@ class BooksRapidRepository @Inject constructor(
                 }
             )
         }
+
+    override suspend fun getAllMessages(): Flow<Either<Failure, List<Message>>> {
+        val textList = listOf<Message>(
+            Message(
+                "How are you doing?",
+                MessageListItem.MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal
+            ),
+            Message("Hello!", MessageListItem.MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal)
+        )
+        return flow { emit(Either.Right(textList)) }
+    }
 }
