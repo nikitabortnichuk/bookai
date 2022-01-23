@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -22,10 +23,9 @@ abstract class BaseUseCase<in Params, out Type> where Type : Any {
         val backgroundJob = CoroutineScope(job + Dispatchers.IO).async { run(params) }
         CoroutineScope(job + Dispatchers.Main).launch {
             val await = backgroundJob.await()
-//            await.catch {
-//                onResult(Either.Left(Failure.ServerError))
-//            }.collect { d -> onResult(d) }
-            await.collect { d -> onResult(d) }
+            await.catch {
+                onResult(Either.Left(Failure.ServerError))
+            }.collect { d -> onResult(d) }
         }
     }
 }

@@ -15,21 +15,18 @@ import android.view.animation.OvershootInterpolator
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wellenkugel.bookai.R
 import com.wellenkugel.bookai.core.audio.NotificationSound
 import com.wellenkugel.bookai.core.audio.PlayController
 import com.wellenkugel.bookai.core.audio.RecordController
 import com.wellenkugel.bookai.core.ext.onTextChange
-import com.wellenkugel.bookai.databinding.PopularBooksFragmentBinding
+import com.wellenkugel.bookai.databinding.ChatWithBotFragmentBinding
 import com.wellenkugel.bookai.features.characters.presentation.adapter.ChatMessagesAdapter
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
-import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
+import com.wellenkugel.bookai.features.characters.presentation.viewmodel.ChatWithBotViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import java.util.*
 import javax.inject.Inject
 import kotlin.math.min
@@ -37,17 +34,18 @@ import kotlin.math.min
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class PopularBooksFragment : Fragment() {
+class ChatWithBotFragment : Fragment() {
 
-    private var _binding: PopularBooksFragmentBinding? = null
+    private var _binding: ChatWithBotFragmentBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: PopularBooksViewModel by viewModels()
+    private val viewModel: ChatWithBotViewModel by viewModels()
 
     @Inject
     internal lateinit var chatMessagesAdapter: ChatMessagesAdapter
 
     @Inject
     internal lateinit var notificationSound: NotificationSound
+
     private var recordController: RecordController? = null
     private var playController: PlayController? = null
     private var countDownTimer: CountDownTimer? = null
@@ -120,7 +118,7 @@ class PopularBooksFragment : Fragment() {
         recordController = RecordController(requireContext())
         playController = PlayController()
         //////////////////
-        _binding = PopularBooksFragmentBinding.inflate(inflater, container, false)
+        _binding = ChatWithBotFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -131,11 +129,14 @@ class PopularBooksFragment : Fragment() {
         setupMessageInputOnKeyListener()
         setupMessageInputTextChangeListener()
         setupMessagesListAdapter()
-        viewModel.searchPopularBooks()
-
-        ///////
-        viewModel.messageView.observe(viewLifecycleOwner, {
+        viewModel.initialMessageView.observe(viewLifecycleOwner, {
             chatMessagesAdapter.addMessages(it)
+            scrollToLastMessage()
+        })
+        viewModel.messageView.observe(viewLifecycleOwner, {
+            chatMessagesAdapter.addLastMessage(it, isScrollable)
+            scrollToLastMessage()
+            notificationSound.playSound()
         })
         viewModel.getAllMessages()
     }
@@ -150,16 +151,6 @@ class PopularBooksFragment : Fragment() {
             ),
             777,
         )
-    }
-
-    private fun setupMessagesListAdapter() {
-        with(binding.messagesListRecyclerView) {
-            setHasFixedSize(true)
-            adapter = chatMessagesAdapter
-            layoutManager = LinearLayoutManager(this@PopularBooksFragment.requireContext()).apply {
-                reverseLayout = true
-            }
-        }
     }
 
     override fun onDestroyView() {
@@ -201,19 +192,25 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun sendUserMessage() {
-        notificationSound.playSound()
         viewModel.getBookSubjectByQuestion(binding.inputMessage.text.toString())
-        val canScrollVertically = binding.messagesListRecyclerView.canScrollVertically(1)
         chatMessagesAdapter.addLastMessage(
             UserTextMessageItem(binding.inputMessage.text.toString()),
-            canScrollVertically
+            isScrollable
         )
-        if (canScrollVertically) {
+        scrollToLastMessage()
+        binding.inputMessage.setText("")
+    }
+
+    private fun scrollToLastMessage() {
+        if (isScrollable) {
             binding.messagesListRecyclerView.smoothScrollToPosition(0)
         } else {
             binding.messagesListRecyclerView.scrollToPosition(0)
         }
-        binding.inputMessage.setText("")
+    }
+
+    private val isScrollable by lazy {
+        binding.messagesListRecyclerView.canScrollVertically(1)
     }
 
     private fun onVoiceButtonClicked() {
@@ -237,6 +234,17 @@ class PopularBooksFragment : Fragment() {
             }.apply {
                 start()
             }
+        }
+    }
+
+    private fun setupMessagesListAdapter() {
+        with(binding.messagesListRecyclerView) {
+            setHasFixedSize(true)
+            adapter = chatMessagesAdapter
+            layoutManager =
+                LinearLayoutManager(this@ChatWithBotFragment.requireContext()).apply {
+                    reverseLayout = true
+                }
         }
     }
 

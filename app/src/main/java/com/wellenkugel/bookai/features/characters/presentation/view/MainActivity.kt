@@ -3,7 +3,6 @@ package com.wellenkugel.bookai.features.characters.presentation.view
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.wellenkugel.bookai.R
-import com.wellenkugel.bookai.features.characters.presentation.view.PopularBooksFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -14,9 +13,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val characterSearch =
-            PopularBooksFragment()
+            ChatWithBotFragment()
         supportFragmentManager.beginTransaction()
-            .add(R.id.main_host, characterSearch, PopularBooksFragment.TAG)
+            .add(R.id.main_host, characterSearch, ChatWithBotFragment.TAG)
             .commit()
     }
 }

@@ -34,7 +34,6 @@ class BooksRapidRepository @Inject constructor(
                         } ?: Either.Left(Failure.DataError)
                     }
                     false -> {
-                        Log.d("TAGGERR", res.errorBody().toString())
                         Either.Left(Failure.ServerError)
                     }
                 }
@@ -47,15 +46,11 @@ class BooksRapidRepository @Inject constructor(
             emit(
                 when (res.isSuccessful) {
                     true -> {
-                        Log.d("TAGGERR", "inside success")
                         res.body()?.let { it ->
-                            Log.d("TAGGERR", "inside body")
-
                             Either.Right(it.toDomainObject())
                         } ?: Either.Left(Failure.DataError)
                     }
                     false -> {
-                        Log.d("TAGGERR", res.errorBody().toString())
                         Either.Left(Failure.ServerError)
                     }
                 }
@@ -63,7 +58,7 @@ class BooksRapidRepository @Inject constructor(
         }
 
     override suspend fun getAllMessages(): Flow<Either<Failure, List<Message>>> {
-        val textList = listOf<Message>(
+        val textList = listOf(
             Message(
                 "How are you doing?",
                 MessageListItem.MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal

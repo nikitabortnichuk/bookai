@@ -38,6 +38,7 @@
         android:imeOptions="actionNone"
         android:inputType="text"
         android:maxLength="140"
+        android:paddingEnd="40dp"
         android:maxLines="1"
         android:minHeight="45dp"
         android:textColor="@color/white"
