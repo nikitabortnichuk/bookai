@@ -1,8 +1,11 @@
 package com.wellenkugel.bookai.features.characters.presentation.view
 
-import android.media.MediaPlayer
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -25,7 +28,9 @@ import com.wellenkugel.bookai.features.characters.presentation.model.messages.Us
 import com.wellenkugel.bookai.features.characters.presentation.viewmodel.PopularBooksViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.util.*
 import kotlin.math.min
+
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -38,7 +43,8 @@ class PopularBooksFragment : Fragment() {
     private var recordController: RecordController? = null
     private var playController: PlayController? = null
     private var countDownTimer: CountDownTimer? = null
-    private var mediaPlayer: MediaPlayer? = null
+    private var speechRecognizer: SpeechRecognizer? = null
+    private lateinit var speechRecognizerIntent: Intent
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +52,61 @@ class PopularBooksFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // todo move to Dagger
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(requireContext())
+
+        speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        speechRecognizerIntent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+
+        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Log.d("TAGGERR", "sddasdas-2")
+            }
+
+            override fun onBeginningOfSpeech() {
+                Log.d("TAGGERR", "sddasdas-1")
+
+            }
+
+            override fun onRmsChanged(rmsdB: Float) {
+                Log.d("TAGGERR", "sddasdas0")
+
+            }
+
+            override fun onBufferReceived(buffer: ByteArray?) {
+                Log.d("TAGGERR", "sddasdas1")
+
+            }
+
+            override fun onEndOfSpeech() {
+                Log.d("TAGGERR", "sddasdas2")
+
+            }
+
+            override fun onError(error: Int) {
+                Log.d("TAGGERR", "sddasdas3 $error error")
+            }
+
+            override fun onResults(results: Bundle?) {
+                val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                Log.d("TAGGERR", data!![0].toString())
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                Log.d("TAGGERR", "sddasdas4")
+
+            }
+
+            override fun onEvent(eventType: Int, params: Bundle?) {
+                Log.d("TAGGERR", "sddasdas5")
+
+            }
+
+        })
+
         recordController = RecordController(requireContext())
         playController = PlayController()
         chatMessagesAdapter = ChatMessagesAdapter()
@@ -59,10 +120,7 @@ class PopularBooksFragment : Fragment() {
         setupMessagesListAdapter()
         setupMessageInputOnKeyListener()
         setupMessageInputTextChangeListener()
-
         popularBooksViewModel.searchPopularBooks()
-
-
     }
 
     override fun onStart() {
@@ -147,9 +205,8 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        var filePath = ""
         binding.voiceInput.setOnClickListener {
-            onButtonClicked()
+            onVoiceButtonClicked()
         }
         binding.sendButton.setOnClickListener {
             sendUserMessage()
@@ -188,7 +245,9 @@ class PopularBooksFragment : Fragment() {
         binding.inputMessage.setText("")
     }
 
-    private fun onButtonClicked() {
+    private var filePath = ""
+
+    private fun onVoiceButtonClicked() {
         if (recordController?.isAudioRecording() == true) {
             setInputMessageTextAfterRecordingAudio()
             recordController?.stop()
@@ -198,7 +257,7 @@ class PopularBooksFragment : Fragment() {
         } else {
             // todo returns path
             binding.indicator.visibility = View.VISIBLE
-            recordController?.start()
+            filePath = recordController?.start() ?: ""
             setInputMessageTextDuringRecordingAudio()
             countDownTimer = object : CountDownTimer(60_000, VOLUME_UPDATE_DURATION) {
                 override fun onTick(p0: Long) {
