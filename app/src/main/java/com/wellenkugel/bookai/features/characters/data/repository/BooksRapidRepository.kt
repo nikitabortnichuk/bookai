@@ -61,8 +61,8 @@ class BooksRapidRepository @Inject constructor(
             addAll(res.map { it.toDomainObject() }.asReversed())
             add(
                 Message(
-                    "Hello, my name is Andy, and I will help you to find the " +
-                            "book which you need. Type or tell me what are you worried about?",
+                    "Hello, my name is Bookie, and I will help you to find the " +
+                            "book you need. Type or tell me what you are worried about?",
                     MessageListItem.MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal
                 )
             )
