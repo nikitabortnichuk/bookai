@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wellenkugel.bookai.core.exception.Failure
+import com.wellenkugel.bookai.features.characters.data.local.model.MessageEntity
 import com.wellenkugel.bookai.features.characters.domain.model.BookDetails
 import com.wellenkugel.bookai.features.characters.domain.model.BookSubject
 import com.wellenkugel.bookai.features.characters.domain.model.Message
@@ -13,6 +14,7 @@ import com.wellenkugel.bookai.features.characters.domain.model.MessageListItem.M
 import com.wellenkugel.bookai.features.characters.domain.usecases.GetBookSubjectFromQuestionUseCase
 import com.wellenkugel.bookai.features.characters.domain.usecases.GetBooksBySubjectUseCase
 import com.wellenkugel.bookai.features.characters.domain.usecases.GetSavedMessagesUseCase
+import com.wellenkugel.bookai.features.characters.domain.usecases.SaveMessageIntoDatabaseUseCase
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.BotTextMessageItem
 import com.wellenkugel.bookai.features.characters.presentation.model.messages.UserTextMessageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +26,8 @@ import javax.inject.Inject
 class ChatWithBotViewModel @Inject constructor(
     private val popularBooksUseCase: GetBooksBySubjectUseCase,
     private val getBookSubjectFromQuestionUseCase: GetBookSubjectFromQuestionUseCase,
-    private val getSavedMessagesUseCase: GetSavedMessagesUseCase
+    private val getSavedMessagesUseCase: GetSavedMessagesUseCase,
+    private val saveMessageIntoDatabaseUseCase: SaveMessageIntoDatabaseUseCase
 ) : ViewModel() {
 
     private val job = Job()
@@ -48,6 +51,11 @@ class ChatWithBotViewModel @Inject constructor(
     }
 
     fun getBookSubjectByQuestion(text: String) {
+        saveMessageIntoDatabaseUseCase(
+            job,
+            MessageEntity(text = text, ownerId = MessageListItemViewType.USER_TEXT_MESSAGE.ordinal)
+        )
+
         getBookSubjectFromQuestionUseCase(job, text) {
             it.fold(
                 ::handleFailure,
@@ -72,6 +80,16 @@ class ChatWithBotViewModel @Inject constructor(
         if (bookSubject.subject.isNotEmpty()) {
             searchBooksBySubject(bookSubject.subject)
         } else {
+            saveMessageIntoDatabaseUseCase(
+                job,
+                MessageEntity(
+                    text =
+                    "Sorry, I don`t understand you. I can only" +
+                            " help you with book recommendation, try to " +
+                            "explain for me what are you worried about?",
+                    ownerId = MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal
+                )
+            )
             _messageView.value = BotTextMessageItem(
                 "Sorry, I don`t understand you. I can only" +
                         " help you with book recommendation, try to " +
@@ -98,7 +116,23 @@ class ChatWithBotViewModel @Inject constructor(
                 combinedMessage += DIVIDER + bookDetails.title + "\n"
             }
             _messageView.value = BotTextMessageItem(combinedMessage)
+
+            saveMessageIntoDatabaseUseCase(
+                job,
+                MessageEntity(
+                    text = combinedMessage,
+                    ownerId = MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal
+                )
+            )
+
         } else {
+            saveMessageIntoDatabaseUseCase(
+                job,
+                MessageEntity(
+                    text = "Can`t find anything :( Please try explain more detailed",
+                    ownerId = MessageListItemViewType.BOT_TEXT_MESSAGE.ordinal
+                )
+            )
             _messageView.value =
                 BotTextMessageItem("Can`t find anything :( Please try explain more detailed")
         }

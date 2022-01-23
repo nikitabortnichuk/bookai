@@ -1,8 +1,10 @@
 package com.wellenkugel.bookai.core.di
 
 import android.content.Context
+import androidx.room.Room
 import com.wellenkugel.bookai.BuildConfig
 import com.wellenkugel.bookai.core.audio.NotificationSound
+import com.wellenkugel.bookai.features.characters.data.local.MessageChatDatabase
 import com.wellenkugel.bookai.features.characters.data.remote.api.BooksRapidApi
 import com.wellenkugel.bookai.features.characters.data.remote.api.WitAiApi
 import com.wellenkugel.bookai.features.characters.data.repository.BooksRapidRepository
@@ -85,4 +87,23 @@ object NetworkModule {
 abstract class BindsModule {
     @Binds
     abstract fun bindCharacterRepository(repo: BooksRapidRepository): IBooksRapidRepository
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Singleton
+    @Provides
+    fun provideDataBase(@ApplicationContext context: Context): MessageChatDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            MessageChatDatabase::class.java,
+            MessageChatDatabase.DB_NAME
+        ).fallbackToDestructiveMigration().build()
+    }
+
+    @Singleton
+    @Provides
+    fun providesCharacterDao(db: MessageChatDatabase) = db.charactersDao()
 }
