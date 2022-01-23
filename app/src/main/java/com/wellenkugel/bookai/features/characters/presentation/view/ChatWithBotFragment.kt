@@ -92,8 +92,7 @@ class ChatWithBotFragment : Fragment() {
         ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(
-                android.Manifest.permission.RECORD_AUDIO,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.RECORD_AUDIO
             ),
             777,
         )
