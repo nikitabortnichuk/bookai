@@ -232,6 +232,7 @@ class PopularBooksFragment : Fragment() {
     }
 
     private fun sendUserMessage() {
+        popularBooksViewModel.getBookSubjectByQuestion(binding.inputMessage.text.toString())
         val canScrollVertically = binding.messagesListRecyclerView.canScrollVertically(1)
         chatMessagesAdapter.addLastMessage(
             UserTextMessageItem(binding.inputMessage.text.toString()),

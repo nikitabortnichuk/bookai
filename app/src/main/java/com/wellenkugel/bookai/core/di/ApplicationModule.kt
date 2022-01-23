@@ -2,6 +2,7 @@ package com.wellenkugel.bookai.core.di
 
 import com.wellenkugel.bookai.BuildConfig
 import com.wellenkugel.bookai.features.characters.data.remote.api.BooksRapidApi
+import com.wellenkugel.bookai.features.characters.data.remote.api.WitAiApi
 import com.wellenkugel.bookai.features.characters.data.repository.BooksRapidRepository
 import com.wellenkugel.bookai.features.characters.domain.repository.IBooksRapidRepository
 import dagger.Binds
@@ -13,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -21,9 +23,21 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("booksList")
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://books17.p.rapidapi.com/")
+            .client(createClient())
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("witAi")
+    fun provideRetrofitForWitAi(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.wit.ai/")
             .client(createClient())
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
@@ -41,8 +55,14 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideStarWarService(retrofit: Retrofit): BooksRapidApi {
+    fun provideBooksRapidService(@Named("booksList") retrofit: Retrofit): BooksRapidApi {
         return retrofit.create(BooksRapidApi::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWitAiService(@Named("witAi") retrofit: Retrofit): WitAiApi {
+        return retrofit.create(WitAiApi::class.java)
     }
 }
 

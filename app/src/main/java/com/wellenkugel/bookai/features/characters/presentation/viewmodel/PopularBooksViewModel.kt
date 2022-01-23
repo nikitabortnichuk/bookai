@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wellenkugel.bookai.core.exception.Failure
 import com.wellenkugel.bookai.features.characters.domain.model.BookDetails
+import com.wellenkugel.bookai.features.characters.domain.model.BookSubject
+import com.wellenkugel.bookai.features.characters.domain.usecases.GetBookSubjectFromQuestionUseCase
 import com.wellenkugel.bookai.features.characters.domain.usecases.GetBooksBySubjectUseCase
 import com.wellenkugel.bookai.features.characters.presentation.model.state.CharacterSearchView
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,8 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PopularBooksViewModel @Inject constructor(
-    // todo replace with another use case for popular books
     private val popularBooksUseCase: GetBooksBySubjectUseCase,
+    private val getBookSubjectFromQuestionUseCase: GetBookSubjectFromQuestionUseCase
 ) : ViewModel() {
 
     private val job = Job()
@@ -31,7 +33,19 @@ class PopularBooksViewModel @Inject constructor(
                 ::handleSuccess
             )
         }
+    }
 
+    fun getBookSubjectByQuestion(text: String) {
+        getBookSubjectFromQuestionUseCase(job, text) {
+            it.fold(
+                ::handleFailure,
+                ::handleSuccessForBookSubject
+            )
+        }
+    }
+
+    private fun handleSuccessForBookSubject(bookSubject: BookSubject) {
+        Log.d("TAGGERR", "${bookSubject.subject} subject")
     }
 
     private fun handleSuccess(characters: List<BookDetails>) {
