@@ -9,6 +9,6 @@ import retrofit2.http.Query
 interface WitAiApi {
 
     @GET("message?v=20220123/")
-    @Headers("Authorization: Bearer D2ELYYJ4LHRBNJIOXPXZDTCCSBL4LXY5")
+    @Headers("")
     suspend fun getBookSubjectSuggestion(@Query("q") text: String): Response<WitAiSubjectResponse>
 }
