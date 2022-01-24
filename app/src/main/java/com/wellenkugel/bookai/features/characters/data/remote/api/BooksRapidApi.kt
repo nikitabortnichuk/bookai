@@ -10,7 +10,7 @@ import retrofit2.http.POST
 interface BooksRapidApi {
 
     @POST("works/subject")
-    @Headers("")
+    @Headers("rapidapi-key:c95de03c46mshaae8ef4e0268689p19173ejsn678967582a59")
     suspend fun searchBooksBySubject(
         @Body bookBySubjectRequestBody: BookBySubjectRequestBody
     ): Response<BooksSubjectRapidResponse>
